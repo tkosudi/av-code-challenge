@@ -1,71 +1,59 @@
-// main.js - Contains intentional bug: duplicate request issue that candidate should fix
-let adLoaded = false;
-let adData = null;
-
-// Make adData globally accessible to allow duplicate scripts to access it
-if (!window.adData) {
-  window.adData = null;
-}
+const API_BASE = "http://localhost:3000/api";
+let adData = window.adData || null;
 
 async function fetchAd() {
-  if (window.adData) {
-    // Ad already loaded by another script instance - still add click listener (duplicate)
-    const existingImg = document.getElementById('adImage');
-    if (existingImg) {
-      existingImg.addEventListener('click', async () => {
-        await trackClick(window.adData.ad_id);
-        if (window.adData.destination) {
-          window.open(window.adData.destination, '_blank');
-        }
-      });
-    }
-    return;
-  }
-  
+  if (document.getElementById("adImage")) return;
+  if (adData) return renderAd(adData);
+
   try {
-    const res = await fetch('http://localhost:3000/api/ad');
+    const res = await fetch(`${API_BASE}/ad`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
     adData = await res.json();
-    window.adData = adData; // Store globally for duplicate scripts
-    const adElement = document.getElementById('ad');
-    adElement.innerHTML = `<img id="adImage" src="${adData.image}" width="300" height="250" alt="ad" style="cursor:pointer;" />`;
-    
-    // Register click event on ad image
-    document.getElementById('adImage').addEventListener('click', async () => {
-      await trackClick(adData.ad_id);
-      if (adData.destination) {
-        window.open(adData.destination, '_blank');
-      }
-    });
+    window.adData = adData;
+
+    renderAd(adData);
   } catch (err) {
-    console.error('Error loading ad:', err);
-    document.getElementById('ad').innerHTML = '<p style="color:red">Error loading ad</p>';
+    console.error("Error loading ad:", err);
+    document.getElementById("ad").innerHTML =
+      '<p style="color:red">Error loading ad</p>';
   }
+}
+
+function renderAd(data) {
+  const adEl = document.getElementById("ad");
+
+  if (document.getElementById("adImage")) return;
+
+  adEl.innerHTML = `<img id="adImage" src="${data.image}" width="300" height="250" alt="ad" style="cursor:pointer;" />`;
+
+  const img = document.getElementById("adImage");
+
+  img.onerror = () => {
+    adEl.innerHTML = `<div style="width:300px;height:250px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center">Ad</div>`;
+  };
+
+  img.onclick = async () => {
+    await trackClick(data.ad_id);
+    if (data.destination) window.open(data.destination, "_blank");
+  };
 }
 
 async function trackClick(adId) {
   try {
-    await fetch('http://localhost:3000/api/click', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    await fetch(`${API_BASE}/click`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      keepalive: true,
       body: JSON.stringify({
         ad_id: adId,
         user_agent: navigator.userAgent,
-        ip_address: null // Browser can't get real IP, but API will use request IP
-      })
+        ip_address: null,
+      }),
     });
   } catch (err) {
-    console.error('Error tracking click:', err);
+    console.error("Error tracking click:", err);
   }
 }
 
-function redirectToDestination(destination) {
-  window.location.href = destination;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  
-  document.getElementById('loadAd').addEventListener('click', redirectToDestination);
-});
-window.onload = fetchAd; // Intentionally duplicating call - candidate should fix
+document.addEventListener("DOMContentLoaded", fetchAd);
