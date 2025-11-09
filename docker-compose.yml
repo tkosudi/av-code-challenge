@@ -1,0 +1,28 @@
+version: '3.9'
+services:
+  api:
+    build: ./api
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - ALLOWED_ORIGIN=http://localhost:8080
+      - DATABASE_URL=postgresql://support:support@db:5432/adtech
+    depends_on:
+      - db
+  frontend:
+    image: nginx:alpine
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    ports:
+      - "8080:80"
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: support
+      POSTGRES_PASSWORD: support
+      POSTGRES_DB: adtech
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
