@@ -1,14 +1,10 @@
 {
   "name": "frontend",
   "version": "1.0.0",
-  "main": "main.js",
+  "type": "module",
   "scripts": {
     "test": "jest"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "jest": "^29.7.0",
