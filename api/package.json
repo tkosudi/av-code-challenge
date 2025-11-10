@@ -6,7 +6,7 @@
     "build": "tsc",
     "start": "tsx src/server.ts",
     "dev": "tsx src/server.ts",
-    "test": "vitest"
+    "test": "vitest --run --passWithNoTests"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.0",
