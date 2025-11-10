@@ -1,0 +1,13 @@
+{
+  "name": "av-code-challenge-monorepo",
+  "private": true,
+  "workspaces": [
+    "api",
+    "frontend"
+  ],
+  "scripts": {
+    "test:api": "npm run test --workspace api",
+    "test:frontend": "npm run test --workspace frontend",
+    "test:all": "npm run test:api && npm run test:frontend"
+  }
+}
