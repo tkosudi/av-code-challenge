@@ -2,12 +2,12 @@
 
 ## 🧭 Summary
 
-Analytics team reported inconsistencies on the endpoints `/reports/avg-revenue` and `/reports/ctr` compared to internal calculations.
+Analytics team reported inconsistent data returned by the endpoints `/reports/avg-revenue` and `/reports/ctr` compared to internal calculations.
 
 **Symptoms:**
 
 - _FoodDaily_ missing from `/reports/avg-revenue`.
-- Inflated averages for _TechMedia_.
+- Averages higher than expected for _TechMedia_.
 - CTR values for _FoodDaily_ significantly lower than expected.
 
 ---
@@ -129,7 +129,9 @@ After the fix, two new Vitest-based integration suites were introduced to preven
 **Execution:**
 
 ```bash
-pnpm --filter api test
+npm run test:api
+# or
+npm run test --workspace api
 ```
 
 **All tests passing:**
