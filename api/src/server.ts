@@ -16,7 +16,11 @@ const app = Fastify({ logger: true });
 // CORS intentionally restrictive by default; ALLOWED_ORIGIN env var can open it
 // Support engineer should fix this to allow frontend origin
 await app.register(cors, {
-  origin: env.ALLOWED_ORIGIN,
+  origin: env.ALLOWED_ORIGIN
+    ? env.ALLOWED_ORIGIN.split(",").map((o) => o.trim())
+    : false,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-access-token"],
 });
 
 app.register(healthRoutes);
